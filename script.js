@@ -12,41 +12,40 @@ async function fetchJSON(url) {
     return response.json();
 }
 
-// Function to sum SALES from CSV data
-function sumSales(data) {
-    return data.reduce((total, row) => {
-        const sales = parseFloat(row[1]); // Assuming SALES is in the second column
-        return total + (isNaN(sales) ? 0 : sales);
-    }, 0);
-}
+// Function to calculate total sales
+async function calculateTotalSales() {
+    let totalSales = 0;
 
-// Function to update the DOM with the total sales
-function updateTotal(total) {
-    const totalElement = document.getElementById('total-sales');
-    totalElement.textContent = `Total Sales: $${total.toFixed(2)}`;
-    totalElement.setAttribute('aria-live', 'polite'); // For accessibility
-}
-
-// Main function to execute the logic
-async function main() {
+    // Check if data.csv exists and fetch it
     try {
-        // Check if data.csv exists and fetch it
         const csvData = await fetchCSV('./data.csv');
-        const totalSales = sumSales(csvData);
-        updateTotal(totalSales);
-
-        // Check if rates.json exists and fetch it (if needed for conversion)
-        try {
-            const rates = await fetchJSON('./rates.json');
-            // Conversion logic can be added here if necessary
-        } catch (error) {
-            console.warn('rates.json not found or could not be fetched.');
-        }
+        csvData.forEach(row => {
+            const sales = parseFloat(row[1]); // Assuming SALES is in the second column
+            if (!isNaN(sales)) {
+                totalSales += sales;
+            }
+        });
     } catch (error) {
-        console.error('Error fetching data.csv:', error);
+        console.error('Error fetching or parsing data.csv:', error);
     }
+
+    // Check if rates.json exists and fetch it for conversion
+    let conversionRate = 1; // Default to 1 if no conversion needed
+    try {
+        const rates = await fetchJSON('./rates.json');
+        conversionRate = rates.conversionRate || 1; // Assuming conversionRate is a key in the JSON
+    } catch (error) {
+        console.error('Error fetching rates.json:', error);
+    }
+
+    // Apply conversion if necessary
+    totalSales *= conversionRate;
+
+    // Update the DOM and localStorage
+    document.getElementById('total-sales').textContent = `Total Sales: $${totalSales.toFixed(2)}`;
+    localStorage.setItem('totalSales', totalSales);
 }
 
-// Execute the main function
-main();
+// Run the calculation on page load
+document.addEventListener('DOMContentLoaded', calculateTotalSales);
 ```
