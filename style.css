@@ -1,0 +1,7 @@
+
+:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+body { margin: 0; padding: 1rem; background: #fafafa; color: #222; }
+main { max-width: 900px; margin: 0 auto; }
+#result { margin-top: .75rem; padding: .5rem; background: #fff; border: 1px solid #ddd; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid #eee; padding: .5rem; text-align: left; }
